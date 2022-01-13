@@ -2,7 +2,9 @@
 import os
 
 import uvicorn
-from app import app
+
+from shared_code.app import app
+from shared_code.app_timer import app
 
 port_http = os.getenv("PORT_HTTP", "8000")
 

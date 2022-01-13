@@ -21,13 +21,14 @@ ENV APP_VERSION=${ARG_APP_VERSION}
 WORKDIR /app
 
 COPY --from=build-image ./src/dist/*.whl /app/packages/
-COPY ./src/app.py /app
 COPY ./src/main.py /app
-COPY ./src/log_service.py /app/src/log_service.py
-COPY ./src/models.py /app/src/models.py
-COPY ./src/share_service.py /app/src/share_service.py
-COPY ./src/datashare_service.py /app/src/datashare_service.py
-COPY ./src/configuration_service.py /app/src/configuration_service.py
+COPY ./src/shared_code/app.py /app/shared_code/app.py
+COPY ./src/shared_code/app_timer.py /app/shared_code/app_timer.py
+COPY ./src/shared_code/log_service.py /app/shared_code/log_service.py
+COPY ./src/shared_code/models.py /app/shared_code/models.py
+COPY ./src/shared_code/share_service.py /app/shared_code/share_service.py
+COPY ./src/shared_code/datashare_service.py /app/shared_code/datashare_service.py
+COPY ./src/shared_code/configuration_service.py /app/shared_code/configuration_service.py
 COPY ./entrypoint.sh /app
 COPY ./requirements.txt /app
 

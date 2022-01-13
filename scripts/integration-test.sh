@@ -34,7 +34,9 @@ printMessage "Build and Deploy Registry REST API"
 export $(cat "$SCRIPTS_DIRECTORY"/../configuration/.registry.env | grep  APP_NAME | sed "s/\"//g")
 export $(cat "$SCRIPTS_DIRECTORY"/../configuration/.registry.env | grep  AZURE_SUBSCRIPTION_ID | sed "s/\"//g")
 RESOURCE_GROUP="rg${APP_NAME}"
-DEPLOYMENT_NAME=$(az deployment group list -g $RESOURCE_GROUP --subscription $AZURE_SUBSCRIPTION_ID --output json | jq -r '.[0].name')
+DEPLOYMENT_NAME=$(getDeploymentName $AZURE_SUBSCRIPTION_ID $RESOURCE_GROUP 'webAppName')
+checkVariable "Variable DEPLOYMENT_NAME not define" $DEPLOYMENT_NAME 
+
 REGISTRY_APP_SERVER=$(az deployment group show --resource-group $RESOURCE_GROUP -n $DEPLOYMENT_NAME | jq -r '.properties.outputs.webAppServer.value')
 
 printMessage "Build and Deploy share REST API"
@@ -52,7 +54,9 @@ export $(cat "$SCRIPTS_DIRECTORY"/../configuration/.sharea.env | grep  APP_PREFI
 export $(cat "$SCRIPTS_DIRECTORY"/../configuration/.sharea.env | grep  AZURE_SUBSCRIPTION_ID | sed "s/\"//g")
 export $(cat "$SCRIPTS_DIRECTORY"/../configuration/.sharea.env | grep  AZURE_TENANT_ID | sed "s/\"//g")
 RESOURCE_GROUP="rg${APP_NAME}"
-DEPLOYMENT_NAME=$(az deployment group list -g $RESOURCE_GROUP --subscription $AZURE_SUBSCRIPTION_ID  --output json | jq -r '.[0].name')
+DEPLOYMENT_NAME=$(getDeploymentName $AZURE_SUBSCRIPTION_ID $RESOURCE_GROUP 'webAppName')
+checkVariable "Variable DEPLOYMENT_NAME not define" $DEPLOYMENT_NAME 
+
 SHARE_APP_SERVER_A=$(az deployment group show --resource-group $RESOURCE_GROUP  --subscription $AZURE_SUBSCRIPTION_ID  -n $DEPLOYMENT_NAME | jq -r '.properties.outputs.webAppServer.value')
 STORAGE_ACCOUNT_NAME_A=$(az deployment group show --resource-group $RESOURCE_GROUP  --subscription $AZURE_SUBSCRIPTION_ID  -n $DEPLOYMENT_NAME | jq -r '.properties.outputs.storageAccountName.value')
 CONSUME_CONTAINER_A=$(az deployment group show --resource-group $RESOURCE_GROUP  --subscription $AZURE_SUBSCRIPTION_ID  -n $DEPLOYMENT_NAME | jq -r '.properties.outputs.consumeContainerName.value')
@@ -68,7 +72,9 @@ export $(cat "$SCRIPTS_DIRECTORY"/../configuration/.shareb.env | grep  APP_PREFI
 export $(cat "$SCRIPTS_DIRECTORY"/../configuration/.shareb.env | grep  AZURE_SUBSCRIPTION_ID | sed "s/\"//g")
 export $(cat "$SCRIPTS_DIRECTORY"/../configuration/.shareb.env | grep  AZURE_TENANT_ID | sed "s/\"//g")
 RESOURCE_GROUP="rg${APP_NAME}"
-DEPLOYMENT_NAME=$(az deployment group list -g $RESOURCE_GROUP --subscription $AZURE_SUBSCRIPTION_ID  --output json | jq -r '.[0].name')
+DEPLOYMENT_NAME=$(getDeploymentName $AZURE_SUBSCRIPTION_ID $RESOURCE_GROUP 'webAppName')
+checkVariable "Variable DEPLOYMENT_NAME not define" $DEPLOYMENT_NAME 
+
 SHARE_APP_SERVER_B=$(az deployment group show --resource-group $RESOURCE_GROUP  --subscription $AZURE_SUBSCRIPTION_ID  -n $DEPLOYMENT_NAME | jq -r '.properties.outputs.webAppServer.value')
 STORAGE_ACCOUNT_NAME_B=$(az deployment group show --resource-group $RESOURCE_GROUP  --subscription $AZURE_SUBSCRIPTION_ID  -n $DEPLOYMENT_NAME | jq -r '.properties.outputs.storageAccountName.value')
 CONSUME_CONTAINER_B=$(az deployment group show --resource-group $RESOURCE_GROUP  --subscription $AZURE_SUBSCRIPTION_ID  -n $DEPLOYMENT_NAME | jq -r '.properties.outputs.consumeContainerName.value')
@@ -82,7 +88,9 @@ export $(cat "$SCRIPTS_DIRECTORY"/../configuration/.registry.env | grep  APP_NAM
 export $(cat "$SCRIPTS_DIRECTORY"/../configuration/.registry.env | grep  AZURE_SUBSCRIPTION_ID | sed "s/\"//g")
 export $(cat "$SCRIPTS_DIRECTORY"/../configuration/.registry.env | grep  AZURE_TENANT_ID | sed "s/\"//g")
 RESOURCE_GROUP="rg${APP_NAME}"
-DEPLOYMENT_NAME=$(az deployment group list -g $RESOURCE_GROUP --subscription $AZURE_SUBSCRIPTION_ID  --output json | jq -r '.[0].name')
+DEPLOYMENT_NAME=$(getDeploymentName $AZURE_SUBSCRIPTION_ID $RESOURCE_GROUP 'webAppName')
+checkVariable "Variable DEPLOYMENT_NAME not define" $DEPLOYMENT_NAME 
+
 REGISTRY_APP_SERVER=$(az deployment group show --resource-group $RESOURCE_GROUP --subscription $AZURE_SUBSCRIPTION_ID -n $DEPLOYMENT_NAME | jq -r '.properties.outputs.webAppServer.value')
 
 tmp_dir=$(mktemp -d -t env-XXXXXXXXXX)
@@ -123,7 +131,7 @@ if [ "${roleAssignmentCount}" != "1" ];
 then
     printProgress  "Assigning 'Storage Blob Data Contributor' role assignment on container ${SHARE_CONTAINER_A} in storage ${STORAGE_ACCOUNT_NAME_A}..."
     printWarning  "It can sometimes take up to 30 minutes to take into account the new role assignment"
-    cmd="az role assignment create --assignee-object-id \"${currentObjectId}\" --assignee-principal-type ServicePrincipal --scope \"/subscriptions/${AZURE_SUBSCRIPTION_ID_A}/resourceGroups/${RESOURCE_GROUP_A}/providers/Microsoft.Storage/storageAccounts/${STORAGE_ACCOUNT_NAME_A}/blobServices/default/containers/${SHARE_CONTAINER_A}\" --role \"Storage Blob Data Contributor\" --output none"
+    cmd="az role assignment create --assignee-object-id \"${currentObjectId}\" --assignee-principal-type User --scope \"/subscriptions/${AZURE_SUBSCRIPTION_ID_A}/resourceGroups/${RESOURCE_GROUP_A}/providers/Microsoft.Storage/storageAccounts/${STORAGE_ACCOUNT_NAME_A}/blobServices/default/containers/${SHARE_CONTAINER_A}\" --role \"Storage Blob Data Contributor\" --output none"
     printProgress "$cmd"
     eval "$cmd"
 
@@ -135,7 +143,7 @@ if [ "${roleAssignmentCount}" != "1" ];
 then
     printProgress  "Assigning 'Storage Blob Data Reader' role assignment on container ${SHARE_CONTAINER_B} in storage ${STORAGE_ACCOUNT_NAME_B}..."
     printWarning  "It can sometimes take up to 30 minutes to take into account the new role assignment"
-    cmd="az role assignment create --assignee-object-id \"${currentObjectId}\" --assignee-principal-type ServicePrincipal --scope \"/subscriptions/${AZURE_SUBSCRIPTION_ID_B}/resourceGroups/${RESOURCE_GROUP_B}/providers/Microsoft.Storage/storageAccounts/${STORAGE_ACCOUNT_NAME_B}/blobServices/default/containers/${CONSUME_CONTAINER_B}\" --role \"Storage Blob Data Reader\" --output none"
+    cmd="az role assignment create --assignee-object-id \"${currentObjectId}\" --assignee-principal-type User --scope \"/subscriptions/${AZURE_SUBSCRIPTION_ID_B}/resourceGroups/${RESOURCE_GROUP_B}/providers/Microsoft.Storage/storageAccounts/${STORAGE_ACCOUNT_NAME_B}/blobServices/default/containers/${CONSUME_CONTAINER_B}\" --role \"Storage Blob Data Reader\" --output none"
     printProgress "$cmd"
     eval "$cmd"
 fi

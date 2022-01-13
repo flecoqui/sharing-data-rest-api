@@ -39,7 +39,9 @@ azLogin
 checkError
 
 RESOURCE_GROUP="rg${APP_NAME}"
-DEPLOYMENT_NAME=$(az deployment group list -g $RESOURCE_GROUP --output json | jq -r '.[0].name')
+DEPLOYMENT_NAME=$(getDeploymentName $AZURE_SUBSCRIPTION_ID $RESOURCE_GROUP 'webAppName')
+checkVariable "Variable DEPLOYMENT_NAME not define" $DEPLOYMENT_NAME 
+
 
 # Retrieve deployment outputs
 ACR_LOGIN_SERVER=$(az deployment group show --resource-group $RESOURCE_GROUP -n $DEPLOYMENT_NAME | jq -r '.properties.outputs.acrLoginServer.value')
@@ -63,7 +65,7 @@ cat << EOF > ${tmp_dir}/registry-settings.conf
 { "name": "SHARE_NODE_LIST", "value":"[]"}
 ]
 EOF
-deployWebAppContainerConfigFromFile "${AZURE_SUBSCRIPTION_ID}" "${APP_NAME}" "${ACR_LOGIN_SERVER}" "${ACR_NAME}"  "registry_rest_api" "latest" "${tmp_dir}/registry-settings.conf"
+deployWebAppContainerConfigFromFile "${AZURE_SUBSCRIPTION_ID}" "${APP_NAME}" "${ACR_LOGIN_SERVER}" "${ACR_NAME}"  "registry_rest_api" "latest" "${tmp_dir}/registry-settings.conf" "webapp"
 checkError
 
 # Test registry_rest_api

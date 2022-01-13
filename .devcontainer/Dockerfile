@@ -1,4 +1,4 @@
-FROM ubuntu:20.10 
+FROM ubuntu:20.04
 
 ARG USERNAME=dcuser
 ARG USER_UID=1000
@@ -36,6 +36,12 @@ RUN dpkg -i packages-microsoft-prod.deb
 RUN apt-get update \
     && apt-get install -y apt-transport-https \
     && apt-get install -y dotnet-sdk-6.0
+
+# install Azure Function Core Tools
+RUN curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
+RUN mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
+RUN echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-ubuntu-$(lsb_release -cs)-prod $(lsb_release -cs) main" > /etc/apt/sources.list.d/dotnetdev.list
+RUN apt-get update && apt-get install azure-functions-core-tools-4
 
 # update path 
 ENV PATH="$HOME/.local/bin:$PATH"

@@ -3,7 +3,8 @@ from unittest.mock import patch
 
 import pytest
 from fastapi.testclient import TestClient
-from src.models import (
+
+from shared_code.models import (
     ConsumeResponse,
     Dataset,
     Error,
@@ -41,13 +42,17 @@ def test_create_share(
     client: TestClient, initialize_return, initialize_azure_clients_return, status_code
 ):
     with patch("requests.get") as mock_requests_get, patch(
-        "src.datashare_service.DatashareService.initialize_azure_clients"
+        "shared_code.datashare_service.DatashareService.initialize_azure_clients"
     ) as mock_initialize_azure_clients, patch(
-        "src.datashare_service.DatashareService.initialize"
+        "shared_code.datashare_service.DatashareService.initialize"
     ) as mock_initialize, patch(
-        "src.datashare_service.DatashareService.share"
+        "shared_code.datashare_service.DatashareService.share"
     ) as mock_share:
-        node = Node(node_id="testa", tenant_id="00000000-0000-0000-000000000000", identity="00000000-0000-0000-000000000000")
+        node = Node(
+            node_id="testa",
+            tenant_id="00000000-0000-0000-000000000000",
+            identity="00000000-0000-0000-000000000000",
+        )
         mock_requests_get.return_value = MinimalResponse(
             status_code=200, text=node.json()
         )
@@ -98,13 +103,17 @@ def test_get_share(
     client: TestClient, initialize_return, initialize_azure_clients_return, status_code
 ):
     with patch("requests.get") as mock_requests_get, patch(
-        "src.datashare_service.DatashareService.initialize_azure_clients"
+        "shared_code.datashare_service.DatashareService.initialize_azure_clients"
     ) as mock_initialize_azure_clients, patch(
-        "src.datashare_service.DatashareService.initialize"
+        "shared_code.datashare_service.DatashareService.initialize"
     ) as mock_initialize, patch(
-        "src.datashare_service.DatashareService.share_status"
+        "shared_code.datashare_service.DatashareService.share_status"
     ) as mock_share_status:
-        node = Node(node_id="testa", tenant_id="00000000-0000-0000-000000000000", identity="00000000-0000-0000-000000000000")
+        node = Node(
+            node_id="testa",
+            tenant_id="00000000-0000-0000-000000000000",
+            identity="00000000-0000-0000-000000000000",
+        )
         mock_requests_get.return_value = MinimalResponse(
             status_code=200, text=node.json()
         )
@@ -161,13 +170,17 @@ def test_get_consume(
     client: TestClient, initialize_return, initialize_azure_clients_return, status_code
 ):
     with patch("requests.get") as mock_requests_get, patch(
-        "src.datashare_service.DatashareService.initialize_azure_clients"
+        "shared_code.datashare_service.DatashareService.initialize_azure_clients"
     ) as mock_initialize_azure_clients, patch(
-        "src.datashare_service.DatashareService.initialize"
+        "shared_code.datashare_service.DatashareService.initialize"
     ) as mock_initialize, patch(
-        "src.datashare_service.DatashareService.consume"
+        "shared_code.datashare_service.DatashareService.consume"
     ) as mock_consume:
-        node = Node(node_id="testa", tenant_id="00000000-0000-0000-000000000000", identity="00000000-0000-0000-000000000000")
+        node = Node(
+            node_id="testa",
+            tenant_id="00000000-0000-0000-000000000000",
+            identity="00000000-0000-0000-000000000000",
+        )
         mock_requests_get.return_value = MinimalResponse(
             status_code=200, text=node.json()
         )
@@ -219,13 +232,17 @@ def test_shareconsume(
     client: TestClient, initialize_return, initialize_azure_clients_return, status_code
 ):
     with patch("requests.get") as mock_requests_get, patch(
-        "src.datashare_service.DatashareService.initialize_azure_clients"
+        "shared_code.datashare_service.DatashareService.initialize_azure_clients"
     ) as mock_initialize_azure_clients, patch(
-        "src.datashare_service.DatashareService.initialize"
+        "shared_code.datashare_service.DatashareService.initialize"
     ) as mock_initialize, patch(
-        "src.datashare_service.DatashareService.share"
+        "shared_code.datashare_service.DatashareService.share"
     ) as mock_share:
-        node = Node(node_id="testa", tenant_id="00000000-0000-0000-000000000000", identity="00000000-0000-0000-000000000000")
+        node = Node(
+            node_id="testa",
+            tenant_id="00000000-0000-0000-000000000000",
+            identity="00000000-0000-0000-000000000000",
+        )
         mock_requests_get.return_value = MinimalResponse(
             status_code=200, text=node.json()
         )
@@ -328,13 +345,17 @@ def test_consumeshare(
     client: TestClient, initialize_return, initialize_azure_clients_return, status_code
 ):
     with patch("requests.get") as mock_requests_get, patch(
-        "src.datashare_service.DatashareService.initialize_azure_clients"
+        "shared_code.datashare_service.DatashareService.initialize_azure_clients"
     ) as mock_initialize_azure_clients, patch(
-        "src.datashare_service.DatashareService.initialize"
+        "shared_code.datashare_service.DatashareService.initialize"
     ) as mock_initialize, patch(
-        "src.datashare_service.DatashareService.consume"
+        "shared_code.datashare_service.DatashareService.consume"
     ) as mock_consume:
-        node = Node(node_id="testa", tenant_id="00000000-0000-0000-000000000000", identity="00000000-0000-0000-000000000000")
+        node = Node(
+            node_id="testa",
+            tenant_id="00000000-0000-0000-000000000000",
+            identity="00000000-0000-0000-000000000000",
+        )
         mock_requests_get.return_value = MinimalResponse(
             status_code=200, text=node.json()
         )
@@ -381,9 +402,9 @@ def test_consumeshare(
 
 def test_register_node(share_service):
     with patch("requests.post") as mock_requests_post, patch(
-        "src.datashare_service.DatashareService.initialize_azure_clients"
+        "shared_code.datashare_service.DatashareService.initialize_azure_clients"
     ) as mock_initialize_azure_clients, patch(
-        "src.datashare_service.DatashareService.initialize"
+        "shared_code.datashare_service.DatashareService.initialize"
     ) as mock_initialize:
         node = ShareNode(
             node_id="testa",

@@ -30,10 +30,6 @@ else
 fi
 
 
-# Check Variables
-checkVariables
-checkError
-
 pushd "$(dirname "${BASH_SOURCE[0]}")/../src/registry_rest_api" > /dev/null
 # Run all the tests
 pip install -r requirements.txt --quiet

@@ -2,7 +2,8 @@ from datetime import datetime
 from unittest.mock import patch
 
 from fastapi.testclient import TestClient
-from src.models import ConsumeResponse, Dataset, Error, ShareNode, StatusDetails
+
+from shared_code.models import ConsumeResponse, Dataset, Error, ShareNode, StatusDetails
 
 from .conftest import MinimalResponse
 

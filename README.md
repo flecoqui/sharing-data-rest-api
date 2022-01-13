@@ -108,10 +108,11 @@
     - [Services](#services-1)
   - [Unit tests](#unit-tests)
     - [Running unit tests with bash file launch-unit-tests.sh](#running-unit-tests-with-bash-file-launch-unit-testssh)
-    - [Running unit tests with Visual Studio Code](#running-unit-tests-with-visual-studio-code)
+    - [Running registry_rest_api unit tests with Visual Studio Code](#running-registry_rest_api-unit-tests-with-visual-studio-code)
+    - [Running share_rest_api unit tests with Visual Studio Code](#running-share_rest_api-unit-tests-with-visual-studio-code)
   - [End-to-end tests](#end-to-end-tests)
     - [Calling the rest api from the Web browser](#calling-the-rest-api-from-the-web-browser)
-    - [bash file integration-test.sh](#bash-file-integration-testsh)
+    - [bash files integration-test.sh (Azure App Service) and integration-test-func.sh (Azure Function)](#bash-files-integration-testsh-azure-app-service-and-integration-test-funcsh-azure-function)
     - [Pytest with test_datashare.py file](#pytest-with-test_datasharepy-file)
   - [Next steps](#next-steps)
 
@@ -121,7 +122,7 @@ The main objectives of this sample implementation of a REST API using Azure Data
 
 - sharing securely data between organizations through Azure Data Share using isolated sharing nodes
 - sharing easily data with a simple REST API (Scenario 1: POST /share and GET /consume or Scenario 2: POST/GET /shareconsume)
-- offer a flexible implementation based on containers to support either Azure App Service, Azure Function, Azure Container Instance or Azure Kubernetes Architectures.
+- offer a flexible implementation based on containers to support either Azure App Service, Azure Function, Azure Container Instance or Azure Kubernetes Architectures. This repository contains the Azure App Service and Azure Function implementation.
 
 The solution consists in a set of sharing nodes deployed in different Azure Subscriptions. All the sharing nodes are isolated for security reason. As a sharing node if I want to share data with another sharing node I need to get the list of avaialable sharing nodes from a registry service which maintain this list.
 
@@ -610,7 +611,7 @@ Below sample environement file for sharing node:
 
  ![Azure Architecture](docs/readme/img/architecture-800.png)
 
-THose bash scripts files are called from the bash file **./scripts/integration-test.sh** which will deploy the infrastructure.
+Those bash scripts files are called from the bash file **./scripts/integration-test.sh** which will deploy the infrastructure.
 Once the infrastructure is deployed, it will :
 
 - build the container images for the regsitry and the sharing node,
@@ -1541,21 +1542,63 @@ Coverage XML written to file coverage.xml
 Registry and Share unit-tests completed
 ```
 
-### Running unit tests with Visual Studio Code
+### Running registry_rest_api unit tests with Visual Studio Code
 
-You can also run the same unit tests from the Visual Studio Code "Testing" panel.
+You can also run the registry_rest_api unit tests from the Visual Studio Code "Testing" panel.
 
-1. To ensure pytest discover your integration tests run the following command in the dev container shell:
+1. To ensure the file .vscode\settings.json contains the folder 'src/registry_rest_api' where the integration tests are stored. If it's not the case, update the file settings.json and reopen the project with Visual Studio Code and run the devcontainer.
 
-    pytest --collect-only
+```json
+  {
+      "python.testing.pytestArgs": [
+          "src/registry_rest_api"
+      ],
+      "python.testing.unittestEnabled": false,
+      "python.testing.pytestEnabled": true
+  }
+```
 
-2. Then select the Testing panel in VS Code, the list of tests should be displayed:  
-![test 1](docs/readme/img/unit-test-1.png)
-3. Run the tests from test_factory.py in the test tree:  
-![test 2](docs/readme/img/unit-test-2.png)
-4. After few seconds the status of the tests should be updated:  
-![test 3](docs/readme/img/unit-test-3.png)
+2. Ensure the file python-path.env contains the path to './src/registry_rest_api/src'
 
+```bash
+  # Set path of all Python modules here, separated by semicolon
+  PYTHONPATH=./src/registry_rest_api/src:./src/share_rest_api/src
+```
+
+3. Then select the Testing panel in VS Code, the list of tests should be displayed:  
+![test 1](docs/readme/img/test-registry-1.png)
+4. Run the tests from test_datashare.py in the test tree:  
+5. After few minutes the status of the tests should be updated:  
+![test 3](docs/readme/img/test-registry-2.png)
+
+### Running share_rest_api unit tests with Visual Studio Code
+
+You can also run the registry_rest_api unit tests from the Visual Studio Code "Testing" panel.
+
+1. To ensure the file .vscode\settings.json contains the folder 'src/share_rest_api' where the integration tests are stored. If it's not the case, update the file settings.json and reopen the project with Visual Studio Code and run the devcontainer.
+
+```json
+  {
+      "python.testing.pytestArgs": [
+          "src/share_rest_api"
+      ],
+      "python.testing.unittestEnabled": false,
+      "python.testing.pytestEnabled": true
+  }
+```
+
+2. Ensure the file python-path.env contains the path to './src/share_rest_api/src'
+
+```bash
+  # Set path of all Python modules here, separated by semicolon
+  PYTHONPATH=./src/registry_rest_api/src:./src/share_rest_api/src
+```
+
+3. Then select the Testing panel in VS Code, the list of tests should be displayed:  
+![test 1](docs/readme/img/test-share-1.png)
+4. Run the tests from test_datashare.py in the test tree:  
+5. After few minutes the status of the tests should be updated:  
+![test 3](docs/readme/img/test-share-2.png)
 
 ## End-to-end tests
 
@@ -1564,7 +1607,8 @@ Once the infratructure is deployed and the container image deployed, we can test
 You can test the REST API:
 
 - manually using the url /docs which expose the REST API documentation.
-- using the bash file **./scripts/integration-test.sh**
+- using the bash file **./scripts/integration-test.sh** to test the end-to-end scenario with Azure App Service.
+- using the bash file **./scripts/integration-test-func.sh** to test the end-to-end scenario with Azure Functions.
 - using Visual Studio and pytest
 
 The tests are implemented in the files:
@@ -1595,7 +1639,7 @@ For instance, if you want to test manually the registry GET /nodes API, open the
 3. Click on the button Execute, after few seconds the result is displayed on the page:  
   ![Registry API - Get Nodes Execute Result](docs/readme/img/registry-docs-get-nodes-execute-result.png)
 
-### bash file integration-test.sh
+### bash files integration-test.sh (Azure App Service) and integration-test-func.sh (Azure Function)
 
 The bash file **./scripts/launch-test-datashare.sh** will launch the tests included in the file **./scripts/test_datashare.py**.
 This bash file support the following arguments:
@@ -1731,13 +1775,40 @@ Sharing Status from 'corpa' to 'corpb' Invitation '6559cddd-b76b-4607-84a5-e9b7f
 
 ```
 
+You can also run the end-to-end integration tests on an infrastructure based on Azure Function using the following bash file:
+
+    ./scripts/integration-test-func.sh
+
+This bash file will call the following bash files to deploy the registry and share infrastructure based on Azure Function:
+
+    ./scripts/deploy-registry-func.sh
+    ./scripts/deploy-share-func.sh
+
+This bash file will call the following bash files to build the registry container and the share container for Azure Function:
+
+    ./scripts/build-container-registry-func.sh
+    ./scripts/build-container-share-func.sh
+
+This bash file will call the following bash files to deploy the registry container and the share container for Azure Function:
+
+    ./scripts/deploy-container-registry-func.sh
+    ./scripts/deploy-container-share-func.sh
+
 ### Pytest with test_datashare.py file
 
 You can also run the same tests from the Visual Studio Code "Testing" panel.
 
-1. To ensure pytest discover your integration tests run the following command in the dev container shell:
+1. To ensure the file .vscode\settings.json contains the folder 'scripts' where the integration tests are stored. If it's not the case, update the file settings.json and reopen the project with Visual Studio Code and run the devcontainer.
 
-    pytest --collect-only
+```json
+  {
+      "python.testing.pytestArgs": [
+          "scripts"
+      ],
+      "python.testing.unittestEnabled": false,
+      "python.testing.pytestEnabled": true
+  }
+```
 
 2. Then select the Testing panel in VS Code, the list of tests should be displayed:  
 ![test 1](docs/readme/img/test-1.png)
@@ -1751,6 +1822,5 @@ You can also run the same tests from the Visual Studio Code "Testing" panel.
 Below a possible list of improvments for this implementation.
 
 1. Add Azure AD Authentication
-2. Support Azure Function
-3. Support Azure Container Instance
-4. Support Azure Kubernetes Service
+2. Support Azure Container Instance
+3. Support Azure Kubernetes Service

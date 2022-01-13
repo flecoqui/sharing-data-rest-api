@@ -1,0 +1,12 @@
+{
+    "scriptFile": "main.py",
+    "bindings": [
+      {
+        "name": "registrytimer",
+        "type": "timerTrigger",
+        "direction": "in",
+        "schedule": "0 * * * * *",
+        "authLevel": "anonymous"
+      }
+    ]
+  }

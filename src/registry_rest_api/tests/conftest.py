@@ -4,9 +4,10 @@ import os
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from src.app import app as application  # pragma: no cover # NOQA: E402
-from src.configuration_service import ConfigurationService
-from src.registry_service import RegistryService
+
+from shared_code.app import app as application  # pragma: no cover # NOQA: E402
+from shared_code.configuration_service import ConfigurationService
+from shared_code.registry_service import RegistryService
 
 os.environ["AZURE_TENANT_ID"] = "02020202-0000-0000-0000-020202020202"
 os.environ["AZURE_SUBSCRIPTION_ID"] = "03030303-0000-0000-0000-030303030303"

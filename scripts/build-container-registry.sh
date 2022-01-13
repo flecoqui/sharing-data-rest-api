@@ -39,7 +39,9 @@ azLogin
 checkError
 
 RESOURCE_GROUP="rg${APP_NAME}"
-DEPLOYMENT_NAME=$(az deployment group list -g $RESOURCE_GROUP --output json | jq -r '.[0].name')
+DEPLOYMENT_NAME=$(getDeploymentName $AZURE_SUBSCRIPTION_ID $RESOURCE_GROUP 'webAppName')
+checkVariable "Variable DEPLOYMENT_NAME not define" $DEPLOYMENT_NAME 
+
 # force APP_VERSION value
 APP_VERSION=$(date +"%y%m%d.%H%M%S")
 

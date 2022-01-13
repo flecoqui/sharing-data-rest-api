@@ -24,7 +24,17 @@ function checkError() {
         exit 1
     fi
 }
-
+##############################################################################
+#- function used to check if variable is defined
+##############################################################################
+function checkVariable() {
+    #echo "VARIABLE: $2"
+    # shellcheck disable=SC2181
+    if [ -z "$2" ]; then
+        echo -e "${RED}\n$1${NC}"
+        exit 1
+    fi
+}
 ##############################################################################
 #- print functions
 ##############################################################################
@@ -240,6 +250,7 @@ function buildWebAppContainer() {
 #  arg 6: Image Tag
 #  arg 7: Application Version: usually = Image Tag
 #  arg 8: HTTP Port
+#  arg 9: App Type: webapp or functionapp 
 ##############################################################################
 function deployWebAppContainer(){
     SUBSCRIPTION_ID="$1"
@@ -250,13 +261,14 @@ function deployWebAppContainer(){
     imageTag="$6"
     appVersion="$7"
     portHTTP="$8"
+    typeApp="$9"
 
     resourcegroup="rg${prefix}"
     webapp="webapp${prefix}"
 
     # When deployed, WebApps get automatically a managed identity. Ensuring this MSI has AcrPull rights
     printProgress  "Ensure ${webapp} has AcrPull role assignment on ${ContainerRegistryName}..."
-    WebAppMsiPrincipalId=$(az webapp show -n "$webapp" -g "$resourcegroup" -o json | jq -r .identity.principalId)
+    WebAppMsiPrincipalId=$(az ${typeApp} show -n "$webapp" -g "$resourcegroup" -o json | jq -r .identity.principalId)
     WebAppMsiAcrPullAssignmentCount=$(az role assignment list --assignee "$WebAppMsiPrincipalId" --scope /subscriptions/"${SUBSCRIPTION_ID}"/resourceGroups/"${resourcegroup}"/providers/Microsoft.ContainerRegistry/registries/"${ContainerRegistryName}" | jq -r 'select(.[].roleDefinitionName=="AcrPull") | length')
 
     if [ "$WebAppMsiAcrPullAssignmentCount" != "1" ];
@@ -283,13 +295,13 @@ function deployWebAppContainer(){
     eval "$cmd"
 
     printProgress "Create Config"
-    cmd="az webapp config appsettings set -g "$resourcegroup" -n "$webapp" \
+    cmd="az ${typeApp} config appsettings set -g "$resourcegroup" -n "$webapp" \
     --settings APP_VERSION=${appVersion} PORT_HTTP=${portHTTP} WEBSITES_PORT=${portHTTP} --output none"
     printProgress "$cmd"
     eval "$cmd"
 
     printProgress "Restart Web App "
-    cmd="az webapp restart --name $webapp --resource-group $resourcegroup"
+    cmd="az ${typeApp} restart --name $webapp --resource-group $resourcegroup"
     printProgress "$cmd"
     eval "$cmd"
 }
@@ -303,6 +315,7 @@ function deployWebAppContainer(){
 #  arg 5: Image name: for instance share_rest_api, registry_rest_api
 #  arg 6: Image Tag
 #  arg 7: Configuration file path
+#  arg 8: App Type: webapp or functionapp 
 ##############################################################################
 function deployWebAppContainerConfigFromFile(){
     SUBSCRIPTION_ID="$1"
@@ -312,13 +325,13 @@ function deployWebAppContainerConfigFromFile(){
     imageName="$5"
     imageTag="$6"
     configFile="$7"
-
+    typeApp="$8"
     resourcegroup="rg${prefix}"
     webapp="webapp${prefix}"
 
     # When deployed, WebApps get automatically a managed identity. Ensuring this MSI has AcrPull rights
     printProgress  "Ensure ${webapp} has AcrPull role assignment on ${ContainerRegistryName}..."
-    WebAppMsiPrincipalId=$(az webapp show -n "$webapp" -g "$resourcegroup" -o json | jq -r .identity.principalId)
+    WebAppMsiPrincipalId=$(az ${typeApp} show -n "$webapp" -g "$resourcegroup" -o json | jq -r .identity.principalId)
     WebAppMsiAcrPullAssignmentCount=$(az role assignment list --assignee "$WebAppMsiPrincipalId" --scope /subscriptions/"${SUBSCRIPTION_ID}"/resourceGroups/"${resourcegroup}"/providers/Microsoft.ContainerRegistry/registries/"${ContainerRegistryName}" | jq -r 'select(.[].roleDefinitionName=="AcrPull") | length')
 
     if [ "$WebAppMsiAcrPullAssignmentCount" != "1" ];
@@ -345,13 +358,49 @@ function deployWebAppContainerConfigFromFile(){
     eval "$cmd"
 
     printProgress "Create Config"
-    cmd="az webapp config appsettings set -g "$resourcegroup" -n "$webapp" \
+    cmd="az ${typeApp} config appsettings set -g "$resourcegroup" -n "$webapp" \
     --settings @${configFile} --output none"
     printProgress "$cmd"
     eval "$cmd"
 
     printProgress "Restart Web App "
-    cmd="az webapp restart --name $webapp --resource-group $resourcegroup"
+    cmd="az ${typeApp} restart --name $webapp --resource-group $resourcegroup"
     printProgress "$cmd"
     eval "$cmd"
+}
+
+
+##############################################################################
+#- deployWebAppContainer: build webapp container
+#  arg 1: Azure Subscription
+#  arg 2: Resource Group
+#  arg 3: Output variable to support
+##############################################################################
+function getDeploymentName(){
+    subscription="$1"
+    resource_group="$2"
+    output_variable="$3"
+    cmd="az deployment group list -g  ${resource_group} --subscription ${subscription} --output json"
+    #echo "$cmd"
+    result=$(eval "$cmd")
+    cmd="echo '$result' | jq -r 'length'"
+    count=$(eval "$cmd")
+    if [ ! -z $count ] ; then
+        #echo "COUNT: $count"
+        for ((index=0;index<=((${count}-1));index++ ))
+        do
+            cmd="echo '$result' | jq -r '.[${index}].name'"
+            name=$(eval "$cmd")
+            #echo "name: $name"
+            cmd="az deployment group show --resource-group ${resource_group} -n ${name} --subscription ${subscription} | jq -r '.properties.outputs.${output_variable}.value'"
+            value=$(eval "$cmd")
+            #echo "value: $value"
+            if [[ ! -z "$value" ]]; then
+                if [[ "$value" != "null" ]]; then
+                    echo "${name}"
+                    return
+                fi
+            fi
+        done
+    fi               
 }

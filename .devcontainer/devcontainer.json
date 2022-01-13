@@ -5,7 +5,12 @@
   "workspaceFolder": "/dcworkspace",
   "settings": {
     "terminal.integrated.inheritEnv": false,
-    "terminal.integrated.shell.linux": "/bin/bash"
+    "terminal.integrated.shell.linux": "/bin/bash",
+    "python.pythonPath": "/usr/bin/python3",
+    "python.envFile": "${workspaceFolder}/python-path.env",
+    "python.formatting.provider": "black",
+    "python.testing.nosetestsEnabled": false,
+    "python.testing.pytestEnabled": true
   },
   "extensions": [
     "yzhang.markdown-all-in-one",
@@ -15,7 +20,8 @@
     "DavidAnson.vscode-markdownlint",
     "ms-python.python",
     "ms-vscode.azurecli",
-    "ms-azuretools.vscode-docker",
+    "ms-azuretools.vscode-docker",    
+    "ms-azuretools.vscode-azurefunctions"
   ],
   "runArgs": [
     "--init"

@@ -1,0 +1,12 @@
+{
+    "scriptFile": "main.py",
+    "bindings": [
+      {
+        "name": "sharetimer",
+        "type": "timerTrigger",
+        "direction": "in",
+        "schedule": "0 * * * * *",
+        "authLevel": "anonymous"
+      }
+    ]
+  }
